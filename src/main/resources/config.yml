@@ -3,3 +3,5 @@ interval-ticks: 10
 # Limites de seguridad para no matar el rendimiento / los clientes
 max-density: 120
 max-radius: 24
+# En zonas con "dense true": da Velocidad I discreta para compensar que la Ceguera impide correr
+dense-speed-boost: true

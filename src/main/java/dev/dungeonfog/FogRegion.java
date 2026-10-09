@@ -18,6 +18,7 @@ public final class FogRegion {
     public Type type = Type.DUST;
     public int radius = 10;      // radio alrededor del jugador donde aparece la niebla
     public boolean darkness = false;
+    public boolean dense = false; // niebla espesa permanente (Ceguera constante, sin parpadeo)
 
     public FogRegion(String name) {
         this.name = name;

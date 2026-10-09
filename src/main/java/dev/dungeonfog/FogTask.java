@@ -17,29 +17,48 @@ public final class FogTask extends BukkitRunnable {
     private final DungeonFog plugin;
     private final FogManager manager;
     private final Set<UUID> darkened = new HashSet<>();
+    private final Set<UUID> densed = new HashSet<>();
 
     public FogTask(DungeonFog plugin, FogManager manager) {
         this.plugin = plugin;
         this.manager = manager;
     }
 
-    public void forget(UUID id) { darkened.remove(id); }
+    public void forget(UUID id) {
+        darkened.remove(id);
+        densed.remove(id);
+    }
+
+    /** Quita los efectos que puso el plugin (al apagar/recargar). */
+    public void clearAll() {
+        for (Player p : plugin.getServer().getOnlinePlayers()) {
+            if (darkened.remove(p.getUniqueId())) p.removePotionEffect(PotionEffectType.DARKNESS);
+            if (densed.remove(p.getUniqueId())) {
+                p.removePotionEffect(PotionEffectType.BLINDNESS);
+                p.removePotionEffect(PotionEffectType.SPEED);
+            }
+        }
+    }
 
     @Override
     public void run() {
         int maxDensity = plugin.getConfig().getInt("max-density", 120);
         int maxRadius = plugin.getConfig().getInt("max-radius", 24);
+        boolean speedBoost = plugin.getConfig().getBoolean("dense-speed-boost", true);
 
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             Location loc = p.getLocation();
             boolean inDarkness = false;
+            boolean inDense = false;
 
             for (FogRegion r : manager.all()) {
                 if (!r.contains(loc)) continue;
                 spawnFog(p, r, Math.min(r.density, maxDensity), Math.min(r.radius, maxRadius));
                 if (r.darkness) inDarkness = true;
+                if (r.dense) inDense = true;
             }
 
+            // Oscuridad (efecto del warden): su parpadeo lo hace el cliente, no se puede quitar desde el servidor
             if (inDarkness) {
                 PotionEffect cur = p.getPotionEffect(PotionEffectType.DARKNESS);
                 if (cur == null || cur.getDuration() < 40) {
@@ -48,6 +67,24 @@ public final class FogTask extends BukkitRunnable {
                 darkened.add(p.getUniqueId());
             } else if (darkened.remove(p.getUniqueId())) {
                 p.removePotionEffect(PotionEffectType.DARKNESS);
+            }
+
+            // Niebla espesa permanente: Ceguera constante (sin pulso). Se renueva antes de que empiece a desvanecerse.
+            if (inDense) {
+                PotionEffect cur = p.getPotionEffect(PotionEffectType.BLINDNESS);
+                if (cur == null || cur.getDuration() < 70) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 140, 0, true, false, false));
+                }
+                if (speedBoost) {
+                    PotionEffect sp = p.getPotionEffect(PotionEffectType.SPEED);
+                    if (sp == null || (sp.getDuration() < 70 && sp.isAmbient())) {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 140, 0, true, false, false));
+                    }
+                }
+                densed.add(p.getUniqueId());
+            } else if (densed.remove(p.getUniqueId())) {
+                p.removePotionEffect(PotionEffectType.BLINDNESS);
+                if (speedBoost) p.removePotionEffect(PotionEffectType.SPEED);
             }
         }
     }

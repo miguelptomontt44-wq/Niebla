@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public final class FogCommand implements TabExecutor {
 
     private static final List<String> SUBS = List.of("help", "pos1", "pos2", "create", "delete", "list", "info", "set", "reload");
-    private static final List<String> PROPS = List.of("color", "density", "size", "type", "radius", "darkness");
+    private static final List<String> PROPS = List.of("color", "density", "size", "type", "radius", "darkness", "dense");
 
     private final DungeonFog plugin;
     private final FogManager m;
@@ -82,7 +82,7 @@ public final class FogCommand implements TabExecutor {
                 if (r == null) { err(sender, "No existe esa zona."); return true; }
                 msg(sender, r.name + " [" + r.world + "] (" + r.minX + "," + r.minY + "," + r.minZ + ") -> (" + r.maxX + "," + r.maxY + "," + r.maxZ + ")");
                 msg(sender, "color=" + FogRegion.hex(r.color) + " density=" + r.density + " size=" + r.size
-                        + " type=" + r.type + " radius=" + r.radius + " darkness=" + r.darkness);
+                        + " type=" + r.type + " radius=" + r.radius + " darkness=" + r.darkness + " dense=" + r.dense);
             }
             case "set" -> {
                 if (a.length < 4) { err(sender, "Uso: /fog set <nombre> <propiedad> <valor>"); return true; }
@@ -96,6 +96,7 @@ public final class FogCommand implements TabExecutor {
                         case "type" -> r.type = FogRegion.Type.valueOf(a[3].toUpperCase());
                         case "radius" -> r.radius = Math.max(1, Integer.parseInt(a[3]));
                         case "darkness" -> r.darkness = Boolean.parseBoolean(a[3]);
+                        case "dense" -> r.dense = Boolean.parseBoolean(a[3]);
                         default -> { err(sender, "Propiedad desconocida. Usa: " + String.join(", ", PROPS)); return true; }
                     }
                 } catch (IllegalArgumentException ex) {
@@ -124,7 +125,8 @@ public final class FogCommand implements TabExecutor {
         msg(s, "/fog set <nombre> size <0.1-4>  - tamano de la particula (DUST)");
         msg(s, "/fog set <nombre> type <dust|cloud|ash|smoke>");
         msg(s, "/fog set <nombre> radius <n>  - radio de niebla alrededor del jugador");
-        msg(s, "/fog set <nombre> darkness <true|false>  - efecto Oscuridad extra");
+        msg(s, "/fog set <nombre> dense <true|false>  - niebla ESPESA permanente (sin parpadeo)");
+        msg(s, "/fog set <nombre> darkness <true|false>  - efecto Oscuridad (parpadea, es del cliente)");
         msg(s, "/fog list | info <nombre> | delete <nombre> | reload");
     }
 
@@ -145,7 +147,7 @@ public final class FogCommand implements TabExecutor {
                     for (DyeColor d : DyeColor.values()) out.add(d.name().toLowerCase());
                 }
                 case "type" -> Arrays.stream(FogRegion.Type.values()).forEach(t -> out.add(t.name().toLowerCase()));
-                case "darkness" -> { out.add("true"); out.add("false"); }
+                case "darkness", "dense" -> { out.add("true"); out.add("false"); }
                 case "size" -> out.addAll(List.of("2", "3", "4"));
                 case "density" -> out.addAll(List.of("5", "10", "20", "40"));
                 case "radius" -> out.addAll(List.of("6", "10", "16"));

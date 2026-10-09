@@ -31,11 +31,11 @@ public final class DungeonFog extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        if (task != null) task.cancel();
+        if (task != null) { task.clearAll(); task.cancel(); }
     }
 
     public void startTask() {
-        if (task != null) task.cancel();
+        if (task != null) { task.clearAll(); task.cancel(); }
         long interval = Math.max(2L, getConfig().getLong("interval-ticks", 10L));
         task = new FogTask(this, manager);
         task.runTaskTimer(this, 20L, interval);

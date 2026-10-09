@@ -51,6 +51,7 @@ public final class FogManager {
                 r.type = FogRegion.Type.valueOf(s.getString("type", "DUST").toUpperCase());
                 r.radius = s.getInt("radius", 10);
                 r.darkness = s.getBoolean("darkness", false);
+                r.dense = s.getBoolean("dense", false);
                 regions.put(key, r);
             } catch (Exception e) {
                 plugin.getLogger().warning("No se pudo cargar la region '" + key + "': " + e.getMessage());
@@ -71,6 +72,7 @@ public final class FogManager {
             yml.set(p + "type", r.type.name());
             yml.set(p + "radius", r.radius);
             yml.set(p + "darkness", r.darkness);
+            yml.set(p + "dense", r.dense);
         }
         try {
             plugin.getDataFolder().mkdirs();
