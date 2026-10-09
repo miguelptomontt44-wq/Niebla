@@ -1,0 +1,14 @@
+name: DungeonFog
+version: '${version}'
+main: dev.dungeonfog.DungeonFog
+api-version: '26.1'
+description: Niebla de particulas por zonas para dungeons y laberintos
+commands:
+  fog:
+    description: Gestiona las zonas de niebla
+    aliases: [niebla, dfog]
+    usage: /fog help
+permissions:
+  dungeonfog.admin:
+    description: Permite administrar las zonas de niebla
+    default: op

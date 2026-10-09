@@ -1,0 +1,5 @@
+# Cada cuantos ticks se generan las particulas (20 ticks = 1 segundo)
+interval-ticks: 10
+# Limites de seguridad para no matar el rendimiento / los clientes
+max-density: 120
+max-radius: 24
